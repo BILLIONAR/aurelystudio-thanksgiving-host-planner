@@ -1,0 +1,14 @@
+@import '@fontsource/dm-sans/latin-400.css';
+@import '@fontsource/dm-sans/latin-500.css';
+@import '@fontsource/dm-sans/latin-600.css';
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/lora/latin-400.css';
+@import '@fontsource/kalam/latin-400.css';
+@import '@fontsource/caveat/latin-400.css';
+@import '@fontsource/patrick-hand/latin-400.css';
+@import '@fontsource/dancing-script/latin-400.css';
+@import '@fontsource/sacramento/latin-400.css';
+:root{font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;color-scheme:light;background:#f6f1e8}
+html,body,#root{margin:0;min-height:100%;width:100%}
+

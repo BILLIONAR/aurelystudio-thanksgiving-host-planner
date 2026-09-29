@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "AurelyStudio · Thanksgiving Host Planner",
+  "short_name": "AurelyStudio",
+  "description": "Your reusable Thanksgiving and Friendsgiving hosting planner.",
+  "lang": "en",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F6F1E8",
+  "theme_color": "#F6F1E8",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
