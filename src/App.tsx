@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, ReactNode } from 'react';
 import { ACTIVITY_CATEGORIES, AISLES, COLLECTIONS, COURSES, INVENTORY_CATEGORIES, INVITATION_STATUSES, LEFTOVER_STATUSES, LEFTOVER_STORAGE, NOTEBOOK_SECTIONS, ORDER_STATUSES, PRESETS, STORAGE_KEY, addDays, blankGathering, budgetTotals, confirmedCount, contrast, daysUntil, foreground, formatDate, formatTime, freshState, headCount, localDate, mergePrepTemplate, mix, money, normalizeState, ovenConflicts, parseDate, quantity, safeRecipeLink, transferIngredients, transferInventory, uid } from './model';
 import type { Activity, Dish, Expense, Gathering, Grocery, Guest, Ingredient, InventoryItem, Leftover, Memory, NotebookEntry, Order, RecordKind, Slot, State, Task, Theme } from './model';
@@ -7,6 +7,7 @@ import type { IconName } from './icons';
 import './App.css';
 import './Glass.css';
 import { SeasonalBackdrop } from './SeasonalBackdrop';
+import { WelcomeEntrance } from './WelcomeEntrance';
 import { HostingNotebook, activityIdeas } from './HostingNotebook';
 import { HOSTING_PRINT_SECTIONS, HostingPrintSections } from './HostingPrintSections';
 import { KitchenReference } from './KitchenReference';
@@ -89,6 +90,9 @@ function Editor({ editor, event, onClose, onSave }: { editor: EditorState; event
 
 export default function App() {
   const [boot] = useState(initialState); const [recovery, setRecovery] = useState(boot.recovery); const [state, setState] = useState<State>(boot.state); const [page, setPage] = useState<Page>('overview'); const [mobileMenu, setMobileMenu] = useState(false); const [editor, setEditor] = useState<EditorState | null>(null); const [toast, setToast] = useState(''); const [saveError, setSaveError] = useState(''); const [query, setQuery] = useState(''); const [filter, setFilter] = useState('All'); const [month, setMonth] = useState(() => parseDate(state.gatherings.find(g => g.id === state.selected)!.date)); const [printSections, setPrintSections] = useState(PRINT_SECTIONS.slice(0, 6)); const [paper, setPaper] = useState('Letter'); const [inkSaver, setInkSaver] = useState(false); const [printEventId, setPrintEventId] = useState(state.selected); const [installEvent, setInstallEvent] = useState<InstallEvent | null>(null); const fileInput = useRef<HTMLInputElement>(null); const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [entranceReady, setEntranceReady] = useState(Boolean(boot.recovery));
+  const finishEntrance = useCallback(() => setEntranceReady(true), []);
+  useEffect(() => { if (entranceReady) document.getElementById('workspace')?.focus({ preventScroll: true }); }, [entranceReady]);
   const [prepScope, setPrepScope] = useState('All dates'); const [prepCategory, setPrepCategory] = useState('All categories');
   const event = state.gatherings.find(g => g.id === state.selected) ?? state.gatherings[0]; const theme = state.theme; const counts = confirmedCount(event); const totals = budgetTotals(event); const active = NAV.find(n => n.id === page)!; const printEvent = state.gatherings.find(g => g.id === printEventId) ?? event; const progress = event.tasks.length ? Math.round(event.tasks.filter(t => t.done).length / event.tasks.length * 100) : 0;
   function notify(message: string) { setToast(message); if (toastTimer.current) clearTimeout(toastTimer.current); toastTimer.current = setTimeout(() => setToast(''), 4200); }
@@ -127,6 +131,8 @@ export default function App() {
 
   return <div className={`app-shell ${IS_DEMO ? 'demo-edition' : ''} ${theme.night ? 'night' : ''} ${theme.calm ? 'calm' : ''} hand-${theme.coverage.replace(' ', '-').toLowerCase()}`} style={style}>
     <div className="glass-backdrop" aria-hidden="true"><SeasonalBackdrop /></div>
+    {!entranceReady && <WelcomeEntrance name={state.profile} brand={<Brand />} onName={name => setState(s => ({ ...s, profile: name }))} onComplete={finishEntrance} />}
+    <div className="planner-interface" hidden={!entranceReady} inert={!entranceReady} aria-hidden={!entranceReady}>
     <a href="#workspace" className="skip-link">Skip to planner</a>
     {mobileMenu && <button className="nav-backdrop" aria-label="Close navigation" onClick={() => setMobileMenu(false)} />}
     <aside className={`sidebar ${mobileMenu ? 'open' : ''}`}><Brand />{IS_DEMO && <span className="demo-sidebar-label">DEMO · SAMPLE PLAN</span>}<div className="sidebar-divider" /><span className="nav-caption">AT THE TABLE</span><nav aria-label="Planner navigation">{NAV.map(item => <button key={item.id} className={`nav-item ${item.id === page ? 'active' : ''} ${item.id === 'theme' ? 'nav-separator' : ''}`} onClick={() => setPage(item.id)} aria-current={item.id === page ? 'page' : undefined}><Icon name={item.icon} size={19} /><span>{item.name}</span>{item.id === page && <span className="nav-dot" />}</button>)}</nav><div className="sidebar-note"><Icon name="leaf" size={24} /><p className="handwritten">Make room for what matters.</p><span>A reusable plan, year after year.</span></div><button className="install-button" onClick={install}><Icon name="download" size={17} />Install app</button><div className="local-status"><span className="status-dot" />{saveError ? 'Saving unavailable' : 'Saved in this browser'}</div></aside>
@@ -162,6 +168,7 @@ export default function App() {
     <footer className="app-footer"><span>AurelyStudio · Thanksgiving Host Planner</span><span>{IS_DEMO ? 'Sample plan. Your demo changes stay in this browser.' : 'Private plans. Saved in this browser.'}</span></footer></main></div>
     {editor && <Editor key={editor.kind + (editor.record?.id ?? 'new')} editor={editor} event={event} onClose={() => setEditor(null)} onSave={saveRecord} />}
     <div className={`toast ${toast ? 'visible' : ''}`} role="status" aria-live="polite">{toast && <><Icon name="check" size={18} />{toast}</>}</div>
+    </div>
   </div>;
 }
 
